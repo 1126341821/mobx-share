@@ -1,0 +1,89 @@
+http://cn.mobx.js.org/ 里面有张图解释mobx的操作机制
+    事件调用actions（他是唯一可修改state的）
+    state是可观察和最低限度定义的（不应冗余）
+    computed values 可以使纯函数从state推导出值，mobx自动更新ta，在它无用时优化掉
+    reactions 对state做出反应，更新UI
+React 通过提供机制把应用状态转换为可渲染组件树并对其进行渲染。
+React 提供了优化UI渲染的机制， 这种机制就是通过使用虚拟DOM来减少昂贵的DOM变化的数量
+MobX  提供机制来存储和更新应用状态供 React 使用。
+MobX  提供了优化应用状态与 React 组件同步的机制，这种机制就是使用响应式虚拟依赖状态图表，它只有在真正需要的时候才更新并且永远保持是最新的。
+核心概念：
+    Observable state(可观察的状态)
+        MobX 为现有的数据结构(如对象，数组和类实例)添加了可观察的功能。
+        class Todo { // es6版本
+            id = Math.random();
+            @observable title = ""; 可以为引用值
+            @observable finished = false;
+        }
+        function Todo() { // es5
+            this.id = Math.random()
+            extendObservable(this, {
+                title: "",
+                finished: false
+            })
+        }
+    Computed values(计算值)
+        产生一个新的值
+        你可以定义在相关数据发生变化时自动更新的值。 通过@computed 装饰器或者利用 (extend)Observable 时调用 的getter / setter 函数来进行使用。
+        class TodoList {
+            @observable todos = []; 
+            // 当todos发生变化的时候，会自动更新MobX 会确保 unfinishedTodoCount 自动更新
+            @computed get unfinishedTodoCount() {
+                return this.todos.filter(todo => !todo.finished).length;
+            }
+        }
+    Reactions(反应)
+        reactions 在 响应式编程和命令式编程之间建立沟通的桥梁，当数据变化就会告诉组件值改变了
+        可以把你的(无状态函数)组件变成响应式组件，方法是在组件上添加 observer 函数/ 装饰器
+        import React, {Component} from 'react';
+        import ReactDOM from 'react-dom';
+        import {observer} from "mobx-react";
+        @observer
+        class TodoListView extends Component {
+            render() {
+                return <div>
+                    <ul>
+                        {this.props.todoList.todos.map(todo =>
+                            <TodoView todo={todo} key={todo.id} />
+                        )}
+                    </ul>
+                    Tasks left: {this.props.todoList.unfinishedTodoCount}
+                </div>
+            }
+        }
+
+        const TodoView = observer(({todo}) =>
+            <li>
+                <input
+                    type="checkbox"
+                    checked={todo.finished}
+                    onClick={() => todo.finished = !todo.finished}
+                />{todo.title}
+            </li>
+        )
+
+        const store = new TodoList();
+        ReactDOM.render(<TodoListView todoList={store} />, document.getElementById('mount'));
+        自定义 reactions：
+            使用autorun、autorunAsync 和 when 函数即可简单的创建自定义 reactions，以满足你的具体场景。
+            例如，每当 unfinishedTodoCount 的数量发生变化时，下面的 autorun 会打印日志消息:
+            autorun(() => {
+                console.log("Tasks left: " + todos.unfinishedTodoCount)
+            })
+    Actions(动作)
+        http://www.ruanyifeng.com/blog/2016/01/flux.html（flux架构）
+        不同于 flux 系的一些框架，MobX 对于如何处理用户事件是完全开明的。
+            可以用类似 Flux 的方式完成
+            或者使用 RxJS 来处理事件
+            或者用最直观、最简单的方式来处理事件，正如上面演示所用的 onClick
+优点：
+    保证参照完整性：
+        因为数据不需要标准化，所以 MobX 会自动跟踪状态和衍生之间的关系，你可以免费获得参照完整性。
+        没有问题，MobX 会跟踪它们，一旦其中一个引用发生了变化，就会重新渲染。
+    更简单的 actions 更便于维护
+        使用 MobX 修改状态是非常简单的。你只需简单的写出你的目的。MobX 会替你处理好剩下的事情。
+    细粒度的可观测性是高效的（没懂）
+    易操作性
+        MobX 使用原生javascript。由于它的侵入性不强，它可以和绝大部分javascript库共同使用，而不需要特定的 MobX 风格库。
+        可以继续使用你的路由，数据获取和工具库，比如react-router、 director、 superagent、 lodash，等等。
+        你可以在服务器端和客户端使用它，也可以在 react-native 这样的同构应用中使用。

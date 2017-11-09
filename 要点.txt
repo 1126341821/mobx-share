@@ -1,0 +1,36 @@
+1. 定义状态并使其可观察
+    可以用任何你喜欢的数据结构来存储状态，如对象、数组、类,循环数据结构、引用，都没有关系。 
+    import {observable} from 'mobx';
+    var appState = observable({
+        timer: 0
+    });
+2. 创建视图以响应状态的变化
+    当 appState 中相关数据发生改变时视图会自动更新。
+    MobX 会以一种最小限度的方式来更新视图,节省了大量的样板文件,并且高效
+    MobX 可以在任何符合ES5的JavaScript环境中应用
+    import {observer} from 'mobx-react';
+
+    @observer
+    class TimerView extends React.Component {
+        render() {
+            return (<button onClick={this.onReset.bind(this)}>
+                    Seconds passed: {this.props.appState.timer}
+                </button>);
+        }
+
+        onReset () {
+            this.props.appState.resetTimer();
+        }
+    };
+
+    ReactDOM.render(<TimerView appState={appState} />, document.body);
+
+3. 更改状态
+    // 严格模式(默认是不启用)下使用 MobX 时才需要 action 包装。
+    appState.resetTimer = action(function reset() {
+        appState.timer = 0;
+    });
+
+    setInterval(action(function tick() {
+        appState.timer += 1;
+    }), 1000);
