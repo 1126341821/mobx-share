@@ -1,0 +1,11 @@
+[js] Experimental support for decorators is a feature that is subject to change in a future release. Set the 'experimentalDecorators' option to remove this warning.
+[js] Experimental support for decorators is a feature that is subject to change in a future release
+很多搜索结果说应该修改项目根目录下tsconfig.json，添加对于该错误的忽略，但是结果报错依旧，反复尝试后我发现：
+error report提示为[js]所以我们应该设置的是jsconfig.json而非tsconfig.json，同时，jsconfig.json文件应该定义在代码所在文件的目录下而非根目录。设置如下：
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    }
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
