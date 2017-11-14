@@ -46,6 +46,8 @@ class OrderLine {
     class Foo {
         @observable length = 2;
         @computed get squared() {
+            if (this.length === 0)// 
+                throw new Error("Division by zero")
             return this.length * this.length;
         }
         set squared(value) { // 这是一个自动的动作，不需要注解
@@ -53,6 +55,6 @@ class OrderLine {
         }
     }
     const ff=new Foo();
-    ff.squared=100;// set
+    ff.squared=100;// set,会调用set squared(value)
     console.log(ff.squared); // get 100
     console.log(ff.length);// 10

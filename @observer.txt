@@ -1,0 +1,39 @@
+observer 函数/装饰器可以用来将 React 组件转变成响应式组件。
+它用 mobx.autorun 包装了组件的 render 函数以确保任何组件渲染中使用的数据变化时都可以强制刷新组件。
+observer 是由单独的 mobx-react 包提供的。
+import { observer } from "mobx-react";
+import { observable, computed, action, autorun, toJS } from "mobx";
+
+var timerData = observable({
+  secondsPassed: 0
+});
+
+setInterval(() => {
+  timerData.secondsPassed++;
+}, 1000);
+let { secondsPassed } = toJS(timerData);
+@observer
+class Timer extends React.Component {
+  render() {
+    const { secondsPassed } = toJS(timerData);
+    return (
+      <div>
+        <span>Seconds passed: {timerData.secondsPassed} </span>
+        {/* <span>Seconds passed: {this.props.timerData.secondsPassed} </span> */}
+        <span>Seconds passed: {this.props.timerData} </span>
+        
+      </div>)
+  }
+};
+
+console.log(secondsPassed);
+render(
+  <div>
+     <Timer timerData={timerData.secondsPassed}/> 
+    {/* <Timer timerData={timerData}/> */}
+  </div>,
+  document.getElementById("root")
+);
+
+/* <Timer timerData={timerData.secondsPassed}/> 不能这么写 */
+
