@@ -1,0 +1,52 @@
+action (动作)
+
+用法:有很多种，只介绍我用过的
+
+getter，setter用法见：https://github.com/mobxjs/mobx/blob/gh-pages/docs/refguide/computed-decorator.md#setters-for-computed-values
+因为他们是自动的，所以我没用过
+
+任何应用都有动作。动作是任何用来修改状态的东西。 
+
+它接收一个函数并返回具有同样签名的函数，但是用 transaction、untracked 和 allowStateChanges 包裹起来
+，尤其是 transaction 的自动应用会产生巨大的性能收益， 动作会分批处理变化并只在(最外层的)动作完成后通知计算值和反应。
+这将确保在动作完成之前，在动作期间生成的中间值或未完成的值对应用的其余部分是不可见的。
+
+注意: 当启用严格模式时，需要强制使用 action，参见 useStrict。
+
+何时使用@action：
+    应该永远只对修改状态的函数使用动作， 只执行查找，过滤器等函数不应该被标记为动作，
+
+    编写异步动作是非常直观的，只需将所有的回调函数标记为 action 即可。 除此之外，MobX 中的异步过程并没有什么特别之处，异步更新只是一个在未来调用的异步动作。
+
+    严格模式强制所有的状态修改都必须由动作来完成。 这在大型、长期的代码库中是非常有用的最佳实践。当应用初始化时，
+    简单地调用 mobx.useStrict(true)，对于任何不使用动作的状态修改，MobX 都会抛出异常。
+
+    编写异步动作 章节提供了几个关于如何组织异步动作的语法配方，组合使用 promises、async / await、generators 等等。下面我会介绍到
+
+绑定的动作
+    action 装饰器/函数遵循 javascript 中标准的绑定规则。 
+    但是，Mobx 3引入了 action.bound 来自动地将动作绑定到目标对象。 
+    注意，与 action 不同的是，(@)action.bound 不需要一个name参数，名称将始终基于动作绑定的属性。
+    可以对比model／modeList文件，看自己爱好怎么使用  
+        class Ticker {
+            @observable this.tick = 0
+
+            @action.bound
+            increment() {
+                this.tick++ // 'this' 永远都是正确的
+            }
+        }
+
+        const ticker = new Ticker()
+        setInterval(ticker.increment, 1000)
+    也可以使用函数的方式：action.bound 不要和箭头函数一起使用；箭头函数已经是绑定过的并且不能重新绑定
+        const ticker = observable({
+            tick: 1,
+            increment: action.bound(function() {
+                this.tick++ // 绑定 'this'
+            })
+        })
+
+        setInterval(ticker.increment, 1000)
+
+

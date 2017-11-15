@@ -1,3 +1,4 @@
+
 import React from "react";
 import { render } from "react-dom";
 import DevTools from "mobx-react-devtools";
@@ -5,30 +6,108 @@ import DevTools from "mobx-react-devtools";
 import TodoList from "./components/TodoList";
 import TodoListModel from "./models/TodoListModel";
 import TodoModel from "./models/TodoModel";
+import { Provider, observer, Observer, inject } from 'mobx-react';
+import { observable, action } from "mobx";
 
-// const store = new TodoListModel();
+const store = new TodoListModel();
 
-// render(
-//   <div>
-//     <DevTools />
-//     <TodoList store={store} />
-//   </div>,
-//   document.getElementById("root")
-// );
-// store.addTodo("Get Coffee");// 调用todoListmodel添加 Get Coffee
-// store.addTodo("Write simpler code");
-// store.todos[0].finished = true;// 让数据的第一个数据的finished属性为真
+render(
+  <div >
+    <DevTools />
+    <TodoList store={store}/>
+  </div>,
+  document.getElementById("root")
+);
 
-// setTimeout(() => {
-//   store.addTodo("Get a cookie as well");
-// }, 2000);
+store.addTodo("Get Coffee");
+store.addTodo("Write simpler code");
+store.todos[0].finished = true;
 
-// // playing around in the console
-// window.store = store; 
+setTimeout(() => {
+  store.addTodo("Get a cookie as well");
+}, 2000);
+
+// playing around in the console
+window.store = store;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// 将 observer 连接到 store
+
+// mobx-react 包还提供了 Provider 组件，它使用了 React 的上下文(context)机制，可以用来向下传递 stores。
+// 要连接到这些 stores，需要传递一个 stores 名称的数组给 observer，
+// 这使得 stores 可以作为组件的 props 使用。 
+// 这些都可以通过使用装饰器 @observer(["store"]) class ... 或者函数 observer(["store"], React.createClass({ ...来提供。
+
+// const colors = observable({
+//   foreground: 'red',
+//   background: '#fff',
+// });
+// observer应该是内装饰，inject外。之间可能还有其他的装饰器。
+/*@inject("color") @observer
+class Button extends React.Component {
+  render() {
+    return (
+      <button style={{ background: this.props.color.foreground }}>
+        {this.props.children}
+      </button>
+    );
+  }
+}*/
+// @inject("color") 和observer(["color"]，func)的功能是一样的 我认为还是inject比较好使
+// 只要在provider上存在有，inject一下到其子组件即可
+
+// Provider是一个组件，可以使用React的上下文机制将商店（或其他东西）传递给子组件。
+// 你不想通过显式的多层组件传递的东西，这很有用。
+// inject可以用来拿起那些商店。
+// 这是一个更高阶的组件，它接受一个字符串列表并使这些存储对于被包装的组件可用。
+
+/*const Button = observer(["color"], ({ color, children }) =>
+  <button style={{ background: color.foreground }}>
+    {children}
+  </button>
+); // 不推荐这种写法，会报错*/
+
+/*class Message extends React.Component {
+  render() {
+    return (
+      <div>
+        {this.props.text}
+        <Button>Delete</Button>
+      </div>
+    );
+  }
+}
+
+class MessageList extends React.Component {
+
+  render() {
+    const children = this.props.messages.map((message, index) =>
+      <Message text={message.text} key={index} />
+    );
+    return <Provider color={colors}>
+      <div>
+        {children}
+      </div>
+    </Provider>;
+  }
+}
+render(
+  <div>
+    <MessageList messages={[{ text: 'tao' }, { text: 'meinv' }]} />
+  </div>,
+  document.getElementById("root")
+);
+
+setTimeout(() => {
+  colors.foreground = 'blue';
+}, 1000);*/
+// 还可以定制inject：https://github.com/mobxjs/mobx-react#provider-experimental
 
 
-// import { observer } from "mobx-react";
-// import { observable, computed, action, autorun, toJS } from "mobx";
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// 注意传递的数据方式，使用observal后数据被包了一层如果要回归原始数据使用toJS
+// import {observer} from "mobx-react";
+// import {observable, computed, action, autorun, toJS } from "mobx";
 
 // var timerData = observable({
 //   secondsPassed: 0
@@ -47,7 +126,7 @@ import TodoModel from "./models/TodoModel";
 //         <span>Seconds passed: {timerData.secondsPassed} </span>
 //         {/* <span>Seconds passed: {this.props.timerData.secondsPassed} </span> */}
 //         <span>Seconds passed: {this.props.timerData} </span>
-        
+
 //       </div>)
 //   }
 // };
@@ -62,3 +141,26 @@ import TodoModel from "./models/TodoModel";
 // );
 
 // /* <Timer timerData={timerData.secondsPassed}/> 不能这么写 */
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Observer作为一个react组件,组件观察者适用于一个匿名的地区。
+// 不过我不爱用，也没用过
+/*class App extends React.Component {
+  render() {
+    return (
+      <div>
+        {this.props.person.name}
+        <Observer>
+          {() => <div>{this.props.person.name}</div>}
+        </Observer>
+      </div>
+    )
+  }
+}
+
+const person = observable({ name: "John" })
+
+render(<App person={person} />, document.getElementById("root"));// john
+person.name = "john" // will cause the Observer region to re-render // john  // john*/
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+

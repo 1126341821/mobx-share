@@ -1,0 +1,125 @@
+observer 函数/装饰器可以用来将 React 组件转变成响应式组件。
+它用 mobx.autorun 包装了组件的 render 函数以确保任何组件渲染中使用的数据变化时都可以强制刷新组件。
+observer 是由单独的 mobx-react 包提供的。
++++++++++++++++++++++++++++++++++++++++++++++++++
+import { observer } from "mobx-react";
+import { observable, computed, action, autorun, toJS } from "mobx";
+
+var timerData = observable({
+  secondsPassed: 0
+});
+setInterval(() => {
+  timerData.secondsPassed++;
+}, 1000);
+let { secondsPassed } = toJS(timerData);
+@observer
+class Timer extends React.Component {
+  render() {
+    const { secondsPassed } = toJS(timerData);
+    return (
+      <div>
+        <span>Seconds passed: {timerData.secondsPassed} </span>
+        {/* <span>Seconds passed: {this.props.timerData.secondsPassed} </span> */}
+        <span>Seconds passed: {this.props.timerData} </span>
+        
+      </div>)
+  }
+};
+
+console.log(secondsPassed);
+render(
+  <div>
+     secondsPassed 的当前值传递给了 Timer 组件，这个值是不可变值0(JS中所有的原始类型值都是不可变的)。 这个数值永远都不会改变，因此 Timer 组件不会更新
+     <Timer timerData={timerData.secondsPassed}/> 
+    {/* <Timer timerData={timerData}/> */}
+     MobX无法使原始数据类型值转变成可观察的(它可以用对象来包装它们，参见 boxed observables)。 所以值是不可观察的，但是对象的属性可以。这意味着 @observer 实际上是对间接引用(dereference)值的反应。
+  </div>,
+  document.getElementById("root")
+);
+
+/* <Timer timerData={timerData.secondsPassed}/> 不能这么写 */
+
++++++++++++++++++++++++++++++++++++++++++++++++++
+无状态函数组件：component/todo.jsx
+可观察的局部组件状态:component/todoList.jsx
+componentWillReact (生命周期钩子):component/todoList.jsx
+将observer 连接到 store(index.js):
+https://github.com/mobxjs/mobx-react#provider-experimental:
+    Observer也可作为一个react组件,组件观察者适用于一个匿名的地区，不过我不爱用，也没用过(index.js)
+    PropTypes:(看上面的地址)
+       PropTypes.observableArray
+       使用propTypes和defaultProps和其他静态属性结合使用inject
+
+优化组件：
+    使用大量的小组件      
+      @observer 组件会追踪它们使用的所有值，并且当它们中的任何一个改变时重新渲染。
+      所以你的组件越小，它们需要重新渲染产生的变化则越小;
+      这意味着用户界面的更多部分具备彼此独立渲染的可能性。
+    在专用组件中渲染列表
+      这点在渲染大型数据集合时尤为重要。 
+      React 在渲染大型数据集合时表现非常糟糕，因为协调器必须评估每个集合变化的集合所产生的组件。 
+      建议使用专门的组件来映射集合并渲染这个组件，且不再渲染其他组件:
+      不好的代码： 
+          @observer class MyComponent extends Component {
+              render() {
+                  const {todos, user} = this.props;
+                  return (<div>
+                      {user.name}
+                      <ul>
+                          {todos.map(todo => <TodoView todo={todo} key={todo.id} />)}
+                      </ul>
+                  </div>)
+              }
+          }
+          user.name 改变时，React 会不必要地协调所有的 TodoView 组件。
+          尽管TodoView 组件不会重新渲染，但是协调的过程本身是非常昂贵的。
+      好的代码： 
+          @observer class MyComponent extends Component {
+              render() {
+                  const {todos, user} = this.props;
+                  return (<div>
+                      {user.name}
+                      <TodosView todos={todos} />
+                  </div>)
+              }
+          }
+
+          @observer class TodosView extends Component {
+              render() {// 专门的组件来映射集合并渲染这个组件
+                  const {todos} = this.props;
+                  return <ul>
+                      {todos.map(todo => <TodoView todo={todo} key={todo.id} />)}
+                  </ul>)
+              }
+          }
+      不要使用数组的索引作为 key:
+          不用使用数组索引或者任何将来可能会改变的值作为 key 。如果需要的话为你的对象生成 id。
+      晚一点使用间接引用值:
+          使用 mobx-react 时，推荐尽可能晚的使用间接引用值。 
+          这是因为当使用 observable 间接引用值时 MobX 会自动重新渲染组件。 
+          如果间接引用值发生在组件树的层级越深，那么需要重新渲染的组件就越少。
+          快的:
+            <DisplayName person={person} /> //当 name 属性变化时，第一种情况会触发 DisplayName 组件重新渲染
+          慢的:
+            <DisplayName name={person.name} />.// 组件的拥有者需要重新渲染
+          使用可理解的 API 比应用此优化更为重要。 为了两全其美，考虑制造更小的组件:
+            const PersonNameDisplayer = observer(({ props }) => <DisplayName name={props.person.name} />)
+      尽早绑定函数:
+          适用于普通的React 和用了 PureRenderMixin 的库，尽量避免在 render 方法中创建新的闭包。
+          不好的代码：
+            render() {
+                // MyWidget里使用的 PureRenderMixin 中的 shouldComponent 的返回值永远是 false，
+                // 因为每当父组件重新渲染时你传递的都是一个新函数。
+                return <MyWidget onClick={() => { alert('hi') }} />
+            }
+          好的:
+            render() {
+                return <MyWidget onClick={this.handleClick} />
+            }
+            handleClick = () => {
+                alert('hi')
+            }
+           
+使用observe到每个显示可观察数据的组件，即使是小的。observer本身的开销是可以忽略的。
+observer允许组件独立于其父级进行渲染，通常这意味着您使用的越多observer，性能就越好。
+可以参见文档： https://github.com/mobxjs/mobx/issues/101
