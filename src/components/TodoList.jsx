@@ -17,14 +17,14 @@ import Todo from "./Todo";
 class TodoList extends React.Component {
   @observable newTodoTitle = "";
   componentWillUpdate(nextProps, nextState) {
-    console.log('componentWillUpdate');
-    console.log(nextProps, nextState, this.newTodoTitle);
+    // console.log('componentWillUpdate');
+    // console.log(nextProps, nextState, this.newTodoTitle);
   }
   componentDidUpdate() {
-    console.log('componentDidUpdate');
+    // console.log('componentDidUpdate');
   }
   conmponentDidMount() {
-    console.log('conmponentDidMount');
+    // console.log('conmponentDidMount');
   }
   // React 组件通常在新的堆栈上渲染，这使得通常很难弄清楚是什么导致组件的重新渲染。 
   // 当使用 mobx-react 时可以定义一个新的生命周期钩子函数 componentWillReact(一语双关)。

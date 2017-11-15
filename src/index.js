@@ -7,14 +7,14 @@ import TodoList from "./components/TodoList";
 import TodoListModel from "./models/TodoListModel";
 import TodoModel from "./models/TodoModel";
 import { Provider, observer, Observer, inject } from 'mobx-react';
-import { observable, action } from "mobx";
+import { observable, action, autorun, extendObservable, toJS } from "mobx";
 
 const store = new TodoListModel();
 
 render(
   <div >
     <DevTools />
-    <TodoList store={store}/>
+    <TodoList store={store} />
   </div>,
   document.getElementById("root")
 );
@@ -164,3 +164,92 @@ render(<App person={person} />, document.getElementById("root"));// john
 person.name = "john" // will cause the Observer region to re-render // john  // john*/
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
+
+var person = observable({
+  // observable 属性:
+  name: "John",
+  age: 42,
+  showAge: false,
+
+  // 计算属性:
+  get labelText() {
+    console.log(1);
+    return this.showAge ? `${this.name} (age: ${this.age})` : this.name;
+  },
+
+  // 动作:
+  setAge: action(function (age) {
+    this.age = age;
+  })
+});
+
+// 对象属性没有暴露 'observe' 方法,
+// 但不用担心, 'mobx.autorun' 功能更加强大
+autorun(() => console.log(person.labelText)); // jhon dave
+
+person.name = "Dave";
+
+// 输出: 'Dave'
+// 当给值的时候就会自动调用autorun，autorun去调用person.labelText,和调用computed一样
+// 和例子一样只是例子是用个类来封装，这个是对象
+person.father = "习大大";
+// 当通过 observable 传递对象时，只有在把对象转变 observable 时存在的属性才会是可观察的。
+// 稍后添加到对象的属性不会变为可观察的，除非使用 extendObservable(实践有误，但可记住这点)
+
+
+
+//++++++++++++++++++++++++++++++++++++++++++++++++
+// maps
+
+var arr = observable.map({ a: 1 });
+console.log(arr.has('a'));// true
+arr.set("a", 2);
+console.log(toJS(arr))// {a:2}
+
+
+//++++++++++++++++++++++++++++++++++++++++++++++++
+// box values
+
+// string
+// const cityName = observable("Vienna");
+
+// console.log(cityName.get());// 输出 'Vienna'
+
+// cityName.observe(function (change) {
+//   console.log("change", change);
+//   // oldValue newValue type object
+//   console.log(change.oldValue, "->", change.newValue);
+// });
+
+// cityName.set("Amsterdam");
+
+// arr
+const myArray = ["Vienna"];
+const cityName = observable(myArray);
+
+console.log(cityName[0]);// 输出 'Vienna'
+
+cityName.observe(function (observedArray) {
+  console.log(observedArray);
+  // 返回各种信息可以查看
+  if (observedArray.type === "update") {
+    console.log(observedArray.oldValue + "->" + observedArray.newValue);
+  } else if (observedArray.type === "splice") {
+    if (observedArray.addedCount > 0) {
+      console.log(observedArray.added + " added");
+    }
+    if (observedArray.removedCount > 0) {
+      console.log(observedArray.removed + " removed");
+    }
+  }
+});
+
+cityName[0] = "Amsterdam";
+// 输出 'Vienna -> Amsterdam'
+
+cityName[1] = "Cleveland";
+// 输出 'Cleveland added'
+
+cityName.splice(0, 1);
+// 输出 'Amsterdam removed'

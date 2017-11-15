@@ -1,0 +1,20 @@
+原值类型值和引用类型值：
+    JS 中的所有原始类型值都是不可变的，它们是不可观察的。 
+    对于这种情况，可以创建一个 observable box 以便管理这样的原始类型值。
+observable.box(value)
+    接收任何值并把值存储到箱子中。 使用 .get() 获取当前值，使用 .set(newValue) 更新值。
+
+    使用它的 .observe 方法注册回调，以监听对存储值的更改。 
+    但因为 MobX 自动追踪了箱子的变化，在绝大多数情况下最好还是使用像 mobx.autorun 这样的 reaction 来替代。
+
+    observable.box(scalar) 返回的对象签名是:
+
+        .get() - 返回当前值。
+        .set(value) - 替换当前存储的值并通知所有观察者。
+        intercept(interceptor) - 可以用来在任何变化应用前将其拦截。参见 observe & intercept。
+        .observe(callback: (change) => void, fireImmediately = false): disposerFunction - 注册一个观察者函数，每次存储值被替换时触发。返回一个函数以取消观察者。参见 observe & intercept。change 参数是一个对象，其中包含 observable 的 newValue 和 oldValue 。
+observable.shallowBox(value)：
+    shallowBox 创建一个基于 ref 调节器的箱子。这意味着箱子里的任何(将来)值都不会自动地转换成 observable 。
+
+当使用通用的 observable(value) 方法时， MobX 会为任何不能转换成 observable 的值自动创建一个 observable 箱子。
+有两个demo（index.jss）:看看她的工作方式及

@@ -1,0 +1,19 @@
+MobX 会对什么作出反应:
+    MobX 会对在追踪函数执行过程中读取现存的可观察属性做出反应。
+    “读取” 是对象属性的间接引用，可以用过 . (例如 user.name) 或者 [] (例如 user['name']) 的形式完成。
+    “追踪函数” 是 computed 表达式、observer 组件的 render() 方法和 when、reaction 和 autorun 的第一个入参函数。
+    “过程(during)” 意味着只追踪那些在函数执行时被读取的 observable 。这些值是否由追踪函数直接或间接使用并不重要。
+MobX 不会对其作出反应:
+    从 observable 获取的值，但是在追踪函数之外
+    在异步调用的代码块中读取的 observable
+MobX 追踪属性访问，而不是值
+    let message = observable({
+        title: "Foo",
+        title: {
+            name: "Michel"
+        },
+        likes: [
+            "John", "Sara"
+        ]
+    });
+    可观察的属性：title，title，name，likes，likes.length

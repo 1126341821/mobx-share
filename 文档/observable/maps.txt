@@ -1,0 +1,17 @@
+Observable 映射:
+语法：observable.map(values)
+
+observable.map(values?) - 创建一个动态键的 observable 映射。
+如果你不但想对一个特定项的更改做出反应，而且对添加或删除该项也做出反应的话，那么 observable 映射会非常有用。
+observable.map(values) 中的 values 可以是对象、 数组或者字符串键的 ES6 map。 
+与 ES6 map 不同的是，键只能是字符串。
+有很多暴露的方法请看文档，以下是几个方法的例子：
+    var arr=observable.map({a:1});
+    console.log(arr.has('a'));// true
+    arr.set("a",2);
+    console.log(toJS(arr))// {a:2}
+
+observable.shallowMap(values)
+
+    任何分配给 observable 映射的值都会默认通过 observable 来传递使其转变成可观察的。
+    创建浅映射以禁用此行为，并按原样存储值。关于此机制的更多详情，请参见 调节器。
