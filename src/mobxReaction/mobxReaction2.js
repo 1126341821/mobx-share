@@ -139,9 +139,9 @@ class DoNotUseTheLocalCache extends React.Component {
     //     super(props);
     //     this.author = props.message.author;
     // }
-    @computed get author() {
+    @computed get getValue() {
         console.log(22);
-        return this.props.message.author
+        return this.props.message;
     }
     @action
     amendName() {
@@ -150,8 +150,12 @@ class DoNotUseTheLocalCache extends React.Component {
         console.log(message);
     }
     render() {
-        console.log("-----", author);
-        return <div onClick={this.amendName.bind(this)} style={{ background: 'red' }}>{author.name}</div >
+        console.log("-----", this.getValue);
+        return <div
+            onClick={this.amendName.bind(this)}
+            style={{ background: 'red' }}>
+            {this.getValue.author.name}
+        </div >
     }
 }
 
@@ -168,7 +172,10 @@ class TodoList extends React.Component {
     }
 }
 
+
 render(
-    <TodoList />,
+    <Provider message={message}>
+        <TodoList message={message} />
+    </Provider>,
     document.getElementById("root")
 );
