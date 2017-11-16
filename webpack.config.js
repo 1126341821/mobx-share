@@ -2,9 +2,9 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  devtool: 'eval',
+  devtool: 'eval-source-map', // ，使得编译后的代码可读性更高，也更容易调试
   entry: [
-    './src/index'
+    './src/mobxReaction'
   ],
   output: {
     path: path.join(__dirname, 'dist'),

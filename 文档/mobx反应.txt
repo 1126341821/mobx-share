@@ -4,7 +4,7 @@ MobX 会对什么作出反应:
     “追踪函数” 是 computed 表达式、observer 组件的 render() 方法和 when、reaction 和 autorun 的第一个入参函数。
     “过程(during)” 意味着只追踪那些在函数执行时被读取的 observable 。这些值是否由追踪函数直接或间接使用并不重要。
 MobX 不会对其作出反应:
-    从 observable 获取的值，但是在追踪函数之外
+    从 observable 获取的值，但是在追踪函数之外,
     在异步调用的代码块中读取的 observable
 MobX 追踪属性访问，而不是值
     let message = observable({
@@ -16,4 +16,43 @@ MobX 追踪属性访问，而不是值
             "John", "Sara"
         ]
     });
+    const title=message.title; // 从 observable 获取的值，但是在追踪函数之外
+    console.log(title)
     可观察的属性：title，title，name，likes，likes.length
+
+错误做法导致不被访问：
+    （1）先是给了一个observable的值给变量，autorun监控的是第一个变量，后又给一个，那么监控的不是同一个
+    （2）const title=message.title; // 从 observable 获取的值，但是在追踪函数之外
+        autorun(() => {
+            console.log(title)//  title 变量不是 observable
+        })
+        message.title = "Bar"
+    （3）const author = message.author;
+        autorun(() => {
+            console.log(author.name)
+        })
+        message.author.name = "Sara"; // 可调动autorun，name还在原来的那个对象
+        message.author = { name: "John" }; //  不可调动，author都不是原来的那个对象了
+    （4）autorun(() => {
+            console.log(message.likes.length);// 正确的
+            console.log(message.likes[0]);// 如果数组的索引超过实际的不行
+            console.log(message.likes.join(", "));// 最好如此访问
+        })
+        message.likes.push("Jennifer");
+
+正确做法可被访问：
+    （1）autorun(() => {// message是 observable,
+            console.log(message.author.name)
+        })
+        message.author.name = "Sara";
+        message.author = { name: "John" };
+    （2）const author = message.author;
+        autorun(() => {
+            console.log(author.name)
+        })
+        message.author.name = "Sara";
+        message.author = { name: "John" };
+    
+
+
+
