@@ -26,7 +26,7 @@ let message = observable({
 // );
 
 // (2) 使用Observer组件也是一样的效果
-const MyComponent = ({ message }) =>
+/*const MyComponent = ({ message }) =>
     <SomeContainer
         title={() =>
             <Observer>
@@ -43,8 +43,36 @@ class SomeContainer extends React.Component {
     }
 }
 
+render(
+    <MyComponent message={message} />,
+    document.getElementById("root")
+);
 
-message.title = "Bar"
+message.title = "Bar";// 组件加observer渲染不起来；*/
+
+
+
+
+
+class SomeContainer extends React.Component {
+    render() {
+        return <div>
+            {this.props.title()}
+        </div>
+    }
+}
+
+const MyComponent = observer(({ message }) =>
+    <SomeContainer // 永远只传递拥有 observable 属性的对象,不然跟踪不到值
+        title={() => <TitleRenderer message={message} />}
+    />
+)
+// observer 只作用于当前组件的 render 函数，
+// 传递一个 render 回调函数或组件给子组件不会自动地变成响应的
+// TitleRenderer没有observer是渲染不出来的
+const TitleRenderer = observer(({ message }) =>
+    <div>{message.title}</div>);
+
 
 render(
     <MyComponent message={message} />,

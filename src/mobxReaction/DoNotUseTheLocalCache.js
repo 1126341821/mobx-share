@@ -83,7 +83,7 @@ let message = observable({
 // @observer
 // class MyComponent extends React.Component {
 
-//     @computed get getValue() {
+//     @computed get getValue() {// 计算值将仅追踪那些它们已被观察的依赖
 //         console.log(22, this.props.message.author.name);
 //         return this.props.message.author.name;
 //     }

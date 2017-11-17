@@ -1,0 +1,92 @@
+编写异步 Actions (动作)
+    action 包装/装饰器只会影响当前运行的函数，而不会影响当前函数调度(但不是调用)的函数！
+    这意味着如果你有一个 setTimeout、promise 的 then 或 async 语句，并且在回调函数中某些状态改变了，
+    这些回调函数也应该包装在 action 中。
+    创建异步动作很几种方式。
+推荐写法：
+    ===================================
+    class Store {
+        @observable githubProjects = []
+        @observable state = "pending" // "pending" / "done" / "error"
+
+        @action
+        fetchProjects() {// 动作只会应用于当前栈。所以你一旦更改model的时候一定要加上action
+            this.githubProjects = []
+            this.state = "pending"
+            fetchGithubProjectsSomehow().then(this.fetchProjectsSuccess, this.fetchProjectsError)
+
+        }
+
+        @action.bound // 回调动作
+        fetchProjectsSuccess(projects) {
+            const filteredProjects = somePreprocessing(projects)
+            this.githubProjects = filteredProjects
+            this.state = "done"
+        }
+        @action.bound // 回调动作
+            fetchProjectsError(error) {
+                this.state = "error"
+            }
+        }
+    ===================================
+    mobx.useStrict(true) // 不允许在动作之外进行状态修改
+
+    class Store {
+        @observable githubProjects = []
+        @observable state = "pending" // "pending" / "done" / "error"
+
+        @action
+        fetchProjects() {
+            this.githubProjects = []
+            this.state = "pending"
+            fetchGithubProjectsSomehow().then(
+                // 内联创建的动作
+                action("fetchSuccess", projects => {
+                    const filteredProjects = somePreprocessing(projects)
+                    this.githubProjects = filteredProjects
+                    this.state = "done"
+                }),
+                // 内联创建的动作
+                action("fetchError", error => {
+                    this.state = "error"
+                })
+            )
+        }
+    }
+        
+runInAction 工具函数:
+
+    内联动作的缺点是 TypeScript 无法对其进行类型推导，所以你应该为所有的回调函数定义类型。 
+    你还可以只在动作中运行回调函数中状态修改的部分，而不是为整个回调创建一个动作。
+    这种模式的优势是它鼓励你不要到处写 action，而是在整个过程结束时尽可能多地对所有状态进行修改：
+
+        mobx.useStrict(true) // 不允许在动作之外进行状态修改
+
+        class Store {
+            @observable githubProjects = []
+            @observable state = "pending" // "pending" / "done" / "error"
+
+            @action
+            fetchProjects() {
+                this.githubProjects = []
+                this.state = "pending"
+                fetchGithubProjectsSomehow().then(
+                    projects => {
+                        const filteredProjects = somePreprocessing(projects)
+                        // 将‘“最终的”修改放入一个异步动作中
+                        runInAction(() => {
+                            this.githubProjects = filteredProjects
+                            this.state = "done"
+                        })
+                    },
+                    error => {
+                        // 过程的另一个结局:...
+                        runInAction(() => {
+                            this.state = "error"
+                        })
+                    }
+                )
+            }
+        }
+
+还有es7的awite语句（自己看文档去吧）
