@@ -1,0 +1,24 @@
+支持哪些浏览器:
+    MobX 只能在 ES5 环境中运行。
+    这意味着支持 Node.js、Rhino和所有浏览器(除了 IE8及以下)
+支持 React Native:
+    mobx 和 mobx-react 都可以在 React Native 中使用。
+    后者通过导入 "mobx-react/native" 。 
+    开发者工具还不支持 React Native 。
+    注意,状态存储在你希望能够与热重新加载一起使用的组件中，
+    那么不要在组件中使用装饰器(注解)，使用函数替代(例如，用 action(fn) 替代 @action)。
+MobX 是框架吗:
+    MobX 不是一个框架。
+    它不会告诉你如何去组织你的代码，在哪存储状态或者如何处理事件。
+    然而，它可能将你从以性能的名义对你的代码提出各种限制的框架中解放出来。
+MobX 可以和 Flux 一起使用吗:
+    假设 store 中的数据是不可变的，这很适合使用 MobX，而 Flux 的实现并不能很好的工作。
+    然而，使用 MobX 时，减少了对 Flux 的需求。 
+    MobX 已经优化了渲染，它适用于大多数类型的数据，包括循环和类。 
+    因此，其他编程范例(如经典MVC)现在也可以轻松应用于使用 ReactJS + MobX 的应用之中。
+MobX 可以和其它框架一起使用吗:
+    或许吧。 MobX 是框架无关的，可以应用在任何现代JS环境中。
+    为了方便起见，它只是用一个小函数来将 ReactJS 组件转换为响应式视图函数。
+    MobX 同样可以在服务器端使用，并且它已经可以和 jQuery (参见此 Fiddle) 和 Deku 一起使用了。
+找寻更多的资源：
+    https://github.com/mobxjs/awesome-mobx#awesome-mobx

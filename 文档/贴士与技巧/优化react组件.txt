@@ -1,0 +1,52 @@
+以下大多数小贴士都适用于普通的 React，而非 MobX 专用的。
+使用大量的小组件：
+    @observer 组件会追踪它们使用的所有值，并且当它们中的任何一个改变时重新渲染。 
+    所以你的组件越小，它们需要重新渲染产生的变化则越小;
+    这意味着用户界面的更多部分具备彼此独立渲染的可能性。
+在专用组件中渲染列表：
+    这点在渲染大型数据集合时尤为重要。 
+    React 在渲染大型数据集合时表现非常糟糕，因为协调器必须评估每个集合变化的集合所产生的组件。
+    因此，建议使用专门的组件来映射集合并渲染这个组件，且不再渲染其他组件:
+    @observer class MyComponent extends Component {
+        render() {
+            const {todos, user} = this.props;
+            return (<div>
+                {user.name}
+                <TodosView todos={todos} />
+                <ul> // 千万不要在这儿写，当 user.name 改变时，React 会不必要地协调(过程本身是非常昂贵)所有的 TodoView 组件 
+                    {todos.map(todo => <TodoView todo={todo} key={todo.id} />)}
+                </ul>
+            </div>)
+        }
+    }
+
+    @observer class TodosView extends Component {
+        render() {
+            const {todos} = this.props;
+            return <ul>
+                {todos.map(todo => <TodoView todo={todo} key={todo.id} />)}
+            </ul>)
+        }
+    }
+不要使用数组的索引作为 key:
+    不用使用数组索引或者任何将来可能会改变的值作为 key 。
+    如果需要的话为你的对象生成 id。 
+    还可以参见这篇 博客https://medium.com/@robinpokorny/index-as-a-key-is-an-anti-pattern-e0349aece318
+尽早绑定函数:
+    此贴士适用于普通的 React 和特别是使用了 PureRenderMixin 的库，
+    尽量避免在 render 方法中创建新的闭包。
+    no:
+        render() {
+        // MyWidget 里使用的 PureRenderMixin 中的 shouldComponent 的返回值永远是 false，
+        // 因为每当父组件重新渲染时你传递的都是一个新函数。
+            return <MyWidget onClick={() => { alert('hi') }} />
+        }
+    yes:
+        render() {
+            return <MyWidget onClick={this.handleClick} />
+        }
+
+        handleClick = () => {
+            alert('hi')
+        }
+

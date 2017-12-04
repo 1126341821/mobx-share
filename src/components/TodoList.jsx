@@ -1,5 +1,5 @@
 
-
+mobx.useStrict(true);
 import React, { Component } from "react";
 import mobx,{ observable, action } from "mobx";
 import { observer, PropTypes } from "mobx-react";
@@ -13,7 +13,7 @@ import Todo from "./Todo";
 // 响应式状态会被 render 提取调用，但不会调用其它 React 的生命周期方法，
 // 除了 componentWillUpdate 和 componentDidUpdate 。
 // 如果你需要用到其他 React 生命周期方法 ，只需使用基于 state 的常规 React API 即可。
-@observer
+@observer // observer 组件越多，渲染效率越高。
 class TodoList extends React.Component {
   @observable newTodoTitle = "";
   componentWillUpdate(nextProps, nextState) {
