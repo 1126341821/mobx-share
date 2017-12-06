@@ -1,6 +1,5 @@
 
 import { observable, computed, action, autorun } from "mobx";
-
 import TodoModel from "./TodoModel";
 
 export default class TodoListModel {
@@ -14,11 +13,8 @@ export default class TodoListModel {
   @action
   addTodo(title) {
     this.todos.push(new TodoModel(title));
-    console.log(this.todos);
-    // todos是被包了一层的数组（ObservableArray），
-    //   并且每个数据有值极为push进去的值
-    //   反之为undefined，
   }
+
   aa = autorun(() => console.log(this.todos));
 }
 

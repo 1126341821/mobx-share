@@ -3,6 +3,16 @@ import { observer } from "mobx-react";
 
 @observer
 class Todo extends React.Component {
+  // componentWillUpdate(nextProps, nextState) {
+  //   console.log('componentWillUpdate');
+  //   // console.log(nextProps, nextState, this.newTodoTitle);
+  // }
+  // componentDidUpdate() {
+  //   console.log('componentDidUpdate');
+  // }
+  // conmponentDidMount() {
+  //   console.log('conmponentDidMount');
+  // }
   render() {
     const { todo } = this.props;
     return (<li>

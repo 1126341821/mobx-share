@@ -4,7 +4,7 @@ var webpack = require('webpack');
 module.exports = {
   devtool: 'eval-source-map', // ，使得编译后的代码可读性更高，也更容易调试
   entry: [
-    './src/demo/actionAutorun.js'
+    './src/index.js'
   ],
   output: {
     path: path.join(__dirname, 'dist'),

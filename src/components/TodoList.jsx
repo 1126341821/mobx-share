@@ -8,24 +8,27 @@ import { observer, PropTypes } from "mobx-react";
 import Todo from "./Todo";
 // 可观察的局部组件状态
 
-// 就像普通类一样，你可以通过使用 @observable 装饰器在React组件上引入可观察属性。 
+// 就像普通类一样，你可以通过使用 @observer 装饰器在React组件上引入可观察属性。 
 // 这意味着你可以在组件中拥有功能同样强大的本地状态(local state)，
 // 而不需要通过 React 的冗长和强制性的 setState 机制来管理。 
 // 响应式状态会被 render 提取调用，但不会调用其它 React 的生命周期方法，
 // 除了 componentWillUpdate 和 componentDidUpdate 。
-// 如果你需要用到其他 React 生命周期方法 ，只需使用基于 state 的常规 React API 即可。
-@observer // observer 组件越多，渲染效率越高。
+// 如需用到其他生命周期方法 ，只需使用基于 state 的常规 React API 即可。
+@observer 
 class TodoList extends React.Component {
   @observable newTodoTitle = "";
+  componentWillMount(){
+    console.log(1)
+  }
   componentWillUpdate(nextProps, nextState) {
-    // console.log('componentWillUpdate');
+    console.log('componentWillUpdate');
     // console.log(nextProps, nextState, this.newTodoTitle);
   }
   componentDidUpdate() {
-    // console.log('componentDidUpdate');
+    console.log('componentDidUpdate'); 
   }
   conmponentDidMount() {
-    // console.log('conmponentDidMount');
+    console.log('conmponentDidMount--------------');
   }
   // React 组件通常在新的堆栈上渲染，这使得通常很难弄清楚是什么导致组件的重新渲染。 
   // 当使用 mobx-react 时可以定义一个新的生命周期钩子函数 componentWillReact(一语双关)。
@@ -38,7 +41,6 @@ class TodoList extends React.Component {
     console.log("I will re-render, since the todo has changed!");
   }
   render() {
-    console.log(this.props)
     return (
       <div>
         <form onSubmit={this.handleFormSubmit}>
