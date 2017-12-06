@@ -1,5 +1,6 @@
 
-mobx.useStrict(true);
+// mobx.useStrict(true); // 严格模式
+
 import React, { Component } from "react";
 import mobx,{ observable, action } from "mobx";
 import { observer, PropTypes } from "mobx-react";

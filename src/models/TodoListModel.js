@@ -1,5 +1,5 @@
 
-import { observable, computed, action ,autorun} from "mobx";
+import { observable, computed, action, autorun } from "mobx";
 
 import TodoModel from "./TodoModel";
 
@@ -19,6 +19,7 @@ export default class TodoListModel {
     //   并且每个数据有值极为push进去的值
     //   反之为undefined，
   }
+  aa = autorun(() => console.log(this.todos));
 }
 
 // class Foo {

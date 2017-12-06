@@ -1,19 +1,18 @@
 
 import React from "react";
 import { render } from "react-dom";
-import DevTools from "mobx-react-devtools";
 
 import TodoList from "./components/TodoList";
-import TodoListModel from "./models/TodoListModel";
-import TodoModel from "./models/TodoModel";
-import { Provider, observer, Observer, inject } from 'mobx-react';
-import { observable, action, autorun, extendObservable, toJS, whyRun } from "mobx";
 
-/*const store = new TodoListModel();
+import TodoListModel from "./models/TodoListModel";
+
+import { Provider, observer, Observer, inject } from 'mobx-react';
+import { observable, action, computed,autorun, extendObservable, toJS, whyRun } from "mobx";
+
+const store = new TodoListModel();
 
 render(
   <div >
-    <DevTools />
     <TodoList store={store} />
   </div>,
   document.getElementById("root")
@@ -28,7 +27,21 @@ setTimeout(() => {
 }, 2000);
 
 // playing around in the console
-window.store = store;*/
+window.store = store;
+
+// var numbers = observable([1,2,3]);
+// var sum = computed(() => numbers.reduce((a, b) => a + b, 0));
+
+// var disposer = autorun(() => console.log(sum.get()));
+// // 输出 '6'
+// numbers.push(4);
+// // 输出 '10'
+
+// disposer();
+// numbers.push(5);
+// // 不会再输出任何值。`sum` 不会再重新计算。
+
+
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // 将 observer 连接到 store
@@ -257,21 +270,21 @@ person.name = "john" // will cause the Observer region to re-render // john  // 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++
 // mobx对什么座做出反应:
-let message = observable({
-  title: "Foo",
-  author: {
-    name: "Michel"
-  },
-  likes: [
-    "John", "Sara"
-  ]
-})
+// let message = observable({
+//   title: "Foo",
+//   author: {
+//     name: "Michel"
+//   },
+//   likes: [
+//     "John", "Sara"
+//   ]
+// })
 
-// const author = message.author;
-autorun(() => {
-  console.log(message.title)
-  whyRun();// 追踪函数内调用 whyRun() 方法来验证 MobX 在追踪什么
-})
+// // const author = message.author;
+// autorun(() => {
+//   console.log(message.title)
+//   whyRun();// 追踪函数内调用 whyRun() 方法来验证 MobX 在追踪什么
+// });
 
 // message.author.name = "Sara";
 // message.author = { name: "John" };
